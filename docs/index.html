@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title></title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v1.10.1/mapbox-gl.css' rel='stylesheet' />
+<style>
+body { margin:0; padding:0; }
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+</style>
+</head>
+<body> 
+<div id='map'></div>
+
+<script>
+var map = new mapboxgl.Map({
+  container: 'map',
+  hash: true,
+  style: 'https://gsi-cyberjapan.github.io/gsivectortile-mapbox-gl-js/std.json',
+  center: [140.6984, 37.8641], 
+  zoom: 9,
+  maxBounds: [
+    [139.0, 37.0],
+    [142.5, 38.6]
+  ],
+  localIdeographFontFamily: ['MS Gothic', 'Hiragino Kaku Gothic Pro', 'sans-serif']
+});
+
+map.on('load', function() {
+  map.addSource('1020do', {
+    type: 'raster',
+    tiles: ['https://maps.gsi.go.jp/xyz/20191012typhoon19_marumori_1020do_sokuho/{z}/{x}/{y}.png'],
+    tileSize: 256,
+    minzoom: 10,
+    maxzoom: 18,
+    attribution: 'GSI'
+  })
+  
+  map.addLayer({
+    id: '1020do',
+    source: '1020do',
+    type: 'raster',
+    minZoom: 10,
+    maxZoom: 24
+  }, 'gsibv-vectortile-layer-1')
+
+  map.addSource('1021do', {
+    type: 'raster',
+    tiles: ['https://maps.gsi.go.jp/xyz/20191012typhoon19_marumori_1021do_sokuho/{z}/{x}/{y}.png'],
+    tileSize: 256,
+    minzoom: 10,
+    maxzoom: 18,
+    attribution: 'GSI'
+  })
+
+  map.addLayer({
+    id: '1021do',
+    source: '1021do',
+    type: 'raster',
+    minZoom: 10,
+    maxZoom: 25
+  }, 'gsibv-vectortile-layer-1')
+
+  map.addSource('geojson', {
+    type: 'geojson',
+    data: 'https://maps.gsi.go.jp/xyz/20191012typhoon19_syamenhoukai_taiseki/2/3/1.geojson'
+  })
+  
+  map.addLayer({
+    id: 'polygons',
+    type: 'fill',
+    source: 'geojson',
+    filter: [
+      'match',
+      [
+        'geometry-type'
+      ],
+      [
+        'Polygon',
+        'MultiPolygon'
+      ],
+      true,
+      false
+    ],
+    paint: {
+      'fill-color': [
+        'get',
+        '_fillColor'
+      ],
+      'fill-opacity': [
+        'get',
+        '_fillOpacity'
+      ]
+    }
+  })
+
+  map.addLayer({
+    id: 'lines',
+    type: 'line',
+    source: 'geojson',
+    paint: {
+      'line-color': [
+        'get',
+        '_color'
+      ],
+      'line-opacity': [
+        'get',
+        'opacity'
+      ],
+      'line-width': [
+        'get',
+        '_weight'
+      ] 
+    }
+  })
+})
+
+map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+map.addControl(new mapboxgl.ScaleControl() );
+</script>
+</body>
+</html>
